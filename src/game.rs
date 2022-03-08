@@ -47,7 +47,7 @@ impl Game {
         if guess.to_lowercase() == self.word.to_lowercase() {
             println!("The word was {}. You Win!", self.word);
             self.won = true;
-        } else if self.guesses > 7 {
+        } else if self.guesses > 6 {
             self.lose = true;
             println!(
                 "Too many incorrect guesses. You Lose! The word was {}",
