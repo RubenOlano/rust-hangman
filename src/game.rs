@@ -1,10 +1,12 @@
+mod board;
+
 use rand::Rng;
 use std::io;
 use std::io::prelude::*;
 
 struct Game {
     word: String,
-    guesses: i8,
+    guesses: usize,
     won: bool,
     lose: bool,
     underscores: String,
@@ -45,7 +47,7 @@ impl Game {
         if guess.to_lowercase() == self.word.to_lowercase() {
             println!("The word was {}. You Win!", self.word);
             self.won = true;
-        } else if self.guesses > 5 {
+        } else if self.guesses > 7 {
             self.lose = true;
             println!(
                 "Too many incorrect guesses. You Lose! The word was {}",
@@ -63,6 +65,7 @@ pub fn run() {
     game.set_underscores();
     println!("Game Start!");
     while !game.won && !game.lose {
+        board::get_state(game.guesses);
         game.read_guess();
     }
 }
