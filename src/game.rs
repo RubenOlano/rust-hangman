@@ -10,6 +10,7 @@ struct Game {
     won: bool,
     lose: bool,
     underscores: Vec<char>,
+    prev_guesses: Vec<char>,
 }
 
 impl Game {
@@ -23,6 +24,7 @@ impl Game {
             won: false,
             lose: false,
             underscores: vec![],
+            prev_guesses: vec![],
         }
     }
 
@@ -37,7 +39,9 @@ impl Game {
     fn read_guess(&mut self) {
         let mut guess = String::new();
         let underscores: String = self.underscores.iter().collect();
+        let guessed: String = self.prev_guesses.iter().collect();
         println!("{}", underscores);
+        println!("Guesses: {}", guessed);
         let mut exit: bool = false;
         while !exit {
             print!("Enter your guess: ");
@@ -56,7 +60,7 @@ impl Game {
     }
 
     fn letters_in_word(&mut self, guess: char) {
-        if self.guesses > 6 {
+        if self.guesses > 5 {
             self.lose = true;
             println!("Too many incorrect guesses! The word was {}", self.word);
         }
@@ -78,6 +82,7 @@ impl Game {
         self.underscores = underscores;
         if !correct {
             self.guesses += 1;
+            self.prev_guesses.push(guess);
         } else {
             let underscores: String = self.underscores.iter().collect();
             if underscores == self.word {
@@ -93,7 +98,7 @@ pub fn run() {
     game.set_underscores();
     println!("Game Start!");
     while !game.won && !game.lose {
-        board::get_state(game.guesses);
         game.read_guess();
+        board::get_state(game.guesses);
     }
 }
