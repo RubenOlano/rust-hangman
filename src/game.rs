@@ -40,7 +40,7 @@ impl Game {
         let mut guess = String::new();
         let underscores: String = self.underscores.iter().collect();
         let guessed: String = self.prev_guesses.iter().collect();
-        println!("{}", underscores);
+        println!("Word: {}", underscores);
         println!("Guesses: {}", guessed);
         let mut exit: bool = false;
         while !exit {
@@ -51,6 +51,7 @@ impl Game {
             if guess.trim().len() == 1 {
                 exit = true;
                 let chars: Vec<char> = guess.chars().collect();
+                println!("You guessed: {}", chars[0]);
                 self.letters_in_word(chars[0])
             } else {
                 println!("Guess must be one character. Try Again");
@@ -60,10 +61,6 @@ impl Game {
     }
 
     fn letters_in_word(&mut self, guess: char) {
-        if self.guesses > 5 {
-            self.lose = true;
-            println!("Too many incorrect guesses! The word was {}", self.word);
-        }
         let mut correct: bool = false;
         let mut underscores = vec![];
         let guess_lower: Vec<char> = guess.to_uppercase().collect();
@@ -80,15 +77,22 @@ impl Game {
             }
         }
         self.underscores = underscores;
+        self.validate_guess(correct, guess)
+    }
+    fn validate_guess(&mut self, correct: bool, guess: char) {
         if !correct {
             self.guesses += 1;
             self.prev_guesses.push(guess);
-        } else {
-            let underscores: String = self.underscores.iter().collect();
-            if underscores == self.word {
-                self.won = true;
-                println!("You win! The word was {}", self.word);
-            }
+        }
+        let underscores: String = self.underscores.iter().collect();
+        if underscores == self.word {
+            self.won = true;
+            println!("\x1B[H\x1B[2J");
+            println!("You win! The word was {}", self.word);
+        }
+        if self.guesses > 5 {
+            self.lose = true;
+            println!("Too many incorrect guesses! The word was {}", self.word);
         }
     }
 }
@@ -98,7 +102,9 @@ pub fn run() {
     game.set_underscores();
     println!("Game Start!");
     while !game.won && !game.lose {
-        game.read_guess();
+        println!("\x1B[H\x1B[2J");
         board::get_state(game.guesses);
+        game.read_guess();
     }
+    board::get_state(game.guesses);
 }
