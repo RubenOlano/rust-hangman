@@ -16,7 +16,7 @@ struct Game {
 impl Game {
     fn init() -> Game {
         let words: [&str; 3] = ["Hi", "Bye", "No"];
-        let rand_index: usize = rand::thread_rng().gen_range(0..3);
+        let rand_index: usize = rand::thread_rng().gen_range(0..words.len());
         let word = words[rand_index];
         Game {
             word: word.to_string(),
