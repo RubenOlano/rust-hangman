@@ -1,6 +1,7 @@
 mod board;
 
 use rand::Rng;
+use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 
@@ -14,10 +15,23 @@ struct Game {
 }
 
 impl Game {
+    fn read_file() -> Vec<String> {
+        let mut f = File::open("src/web2.txt").unwrap();
+        let mut contents = String::new();
+        f.read_to_string(&mut contents).unwrap();
+        let mut words = Vec::new();
+        for line in contents.lines() {
+            if line.len() > 3 {
+                words.push(line.to_string());
+            }
+        }
+        words
+    }
+
     fn init() -> Game {
-        let words: [&str; 3] = ["Hi", "Bye", "No"];
+        let words = Game::read_file();
         let rand_index: usize = rand::thread_rng().gen_range(0..words.len());
-        let word = words[rand_index];
+        let word = &words[rand_index];
         Game {
             word: word.to_string(),
             guesses: 0,
@@ -49,10 +63,15 @@ impl Game {
             io::stdin().read_line(&mut guess).unwrap();
             guess = guess.trim().to_string();
             if guess.trim().len() == 1 {
-                exit = true;
-                let chars: Vec<char> = guess.chars().collect();
-                println!("You guessed: {}", chars[0]);
-                self.letters_in_word(chars[0])
+                // Check if reapeated guess
+                if self.prev_guesses.contains(&guess.chars().next().unwrap()) {
+                    println!("You already guessed that!");
+                } else {
+                    exit = true;
+                    let chars: Vec<char> = guess.chars().collect();
+                    println!("You guessed: {}", chars[0]);
+                    self.letters_in_word(chars[0])
+                }
             } else {
                 println!("Guess must be one character. Try Again");
                 guess = String::new();
