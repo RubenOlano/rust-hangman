@@ -1,4 +1,5 @@
 mod game;
-fn main() {
-    game::run();
+fn main() -> Result<(), game::GameErr> {
+    game::run()?;
+    Ok(())
 }
