@@ -225,9 +225,7 @@ pub fn run() -> Result<(), GameErr> {
             game.read_guess()?;
         }
         board::get_state(game.guesses);
-        if game.won || game.lose {
-            prompt_restart(&mut game)?;
-        }
+        prompt_restart(&mut game)?;
     }
 }
 
