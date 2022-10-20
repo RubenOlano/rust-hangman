@@ -24,6 +24,7 @@ struct Game {
     lose: bool,
     underscores: Vec<char>,
     prev_guesses: Vec<char>,
+    score: usize,
 }
 
 impl Game {
@@ -40,6 +41,7 @@ impl Game {
                     underscores: vec!['_'; word.len()],
                     prev_guesses: Vec::new(),
                     dictionary: words,
+                    score: 0,
                 }
             }
             Err(_) => Game {
@@ -50,6 +52,7 @@ impl Game {
                 underscores: Vec::new(),
                 prev_guesses: Vec::new(),
                 dictionary: Vec::new(),
+                score: 0,
             },
         }
     }
@@ -132,9 +135,7 @@ impl Game {
                     println!("Please enter a single character!");
                 }
             }
-            Err(e) => {
-                return Err(GameErr::UnableToReadWords(e));
-            }
+            Err(e) => return Err(GameErr::UnableToReadWords(e)),
         })
     }
 
@@ -142,10 +143,7 @@ impl Game {
         // vector of underscores
         let mut underscores = vec![];
         let guess_lower: Vec<char> = guess.to_uppercase().collect();
-        let correct = match self.check_letters(&mut underscores, guess_lower) {
-            Ok(c) => c,
-            Err(e) => return Err(e),
-        };
+        let correct = self.check_letters(&mut underscores, guess_lower)?;
         self.underscores = underscores;
         self.validate_guess(correct, guess);
         Ok(())
@@ -187,8 +185,10 @@ impl Game {
         let underscores: String = self.underscores.iter().collect();
         if underscores == self.word {
             self.won = true;
+            self.score += 1;
             println!("{}", CLEAR);
             println!("You win! The word was {}", self.word);
+            println!("Score: {}", self.score);
         }
         if self.guesses > 5 {
             self.lose = true;
@@ -232,21 +232,22 @@ pub fn run() -> Result<(), GameErr> {
 fn prompt_restart(game: &mut Game) -> Result<(), GameErr> {
     let mut restart: String = String::new();
     print!("Play again? (y/n): ");
-    match io::stdout().flush() {
-        Ok(_) => {}
-        Err(e) => println!("Error flushing output: {}", e),
-    };
+    io::stdout().flush().expect("Unable to flush stdout");
+
     match io::stdin().read_line(&mut restart) {
         Ok(_) => {
             restart = restart.trim().to_string().to_lowercase();
             if restart == "y" {
                 game.restart_game();
-            } else {
+            } else if restart == "n" {
                 println!("Thanks for playing!");
                 std::process::exit(0);
+            } else {
+                println!("Please enter y or n!");
+                prompt_restart(game)?;
             }
         }
-        Err(e) => println!("Error reading input: {}", e),
+        Err(e) => return Err(GameErr::UnableToReadWords(e)),
     }
     Ok(())
 }
